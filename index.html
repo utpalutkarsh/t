@@ -6,6 +6,10 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Utpal UTKARSH</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://cdn.tailwindcss.com"/>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin/>
+<link rel="preconnect" href="https://unpkg.com"/>
+<link rel="preconnect" href="https://sketchfab.com"/>
 <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"/>
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
 <style>html { scroll-behavior: smooth; } .container { max-width: 1120px; margin: auto; padding: 0 1rem; }
@@ -40,6 +44,13 @@
 @keyframes earthZoom {
   from { transform: scale(1.05); }
   to { transform: scale(1.1); }
+}
+
+section { content-visibility: auto; contain-intrinsic-size: 1px 1000px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .earth-bg-global iframe { animation: none; }
 }
 </style>
 
@@ -171,27 +182,30 @@ window.addEventListener("load", () => {
 </script>
 
 <script>
-let offset = 0;
+let earthOffset = 0;
+let earthTicking = false;
 
-function animateEarth() {
+function updateEarthPosition() {
   const earth = document.querySelector(".earth-bg-global iframe");
   if (!earth) {
-    requestAnimationFrame(animateEarth);
+    earthTicking = false;
     return;
   }
 
-  const scrollY = window.scrollY;
-  offset += 0.05;
-
-  earth.style.transform = `
-    translateY(${scrollY * 0.08 + offset}px)
-    scale(1.05)
-  `;
-
-  requestAnimationFrame(animateEarth);
+  earthOffset += 0.05;
+  earth.style.transform = `translateY(${window.scrollY * 0.08 + earthOffset}px) scale(1.05)`;
+  earthTicking = false;
 }
 
-animateEarth();
+function queueEarthUpdate() {
+  if (earthTicking) return;
+  earthTicking = true;
+  requestAnimationFrame(updateEarthPosition);
+}
+
+window.addEventListener("scroll", queueEarthUpdate, { passive: true });
+window.addEventListener("resize", queueEarthUpdate);
+window.addEventListener("load", queueEarthUpdate);
 </script>
 </body>
 
